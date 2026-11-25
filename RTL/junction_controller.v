@@ -46,6 +46,7 @@ module junction_controller #(
     reg timer_pause;
 
     reg ped_pending;
+    reg ped_request_seen;
     reg red_elapsed;
 
     // Adaptive green time selection
@@ -57,6 +58,11 @@ module junction_controller #(
             2'b11: adaptive_green_time = 20;
             default: adaptive_green_time = GREEN_TIME;
         endcase
+    end
+
+    // Keep the arbiter request active until pedestrian service completes
+    always @(*) begin
+        ped_req_out = ped_pending;
     end
 
     // Generic timer
@@ -72,12 +78,10 @@ module junction_controller #(
 
     // Timer control
     always @(*) begin
-
         timer_start  = 1'b0;
         timer_target = 0;
 
         case (state)
-
             NS_GREEN: begin
                 timer_start  = 1'b1;
                 timer_target = adaptive_green_time;
@@ -117,26 +121,21 @@ module junction_controller #(
                 timer_start  = 1'b0;
                 timer_target = 0;
             end
-
         endcase
 
         if (timer_pause)
             timer_start = 1'b0;
-
     end
 
     // Next-state logic
     always @(*) begin
-
         next_state = state;
 
         if (emergency_override) begin
             next_state = EMERGENCY;
         end
         else begin
-
             case (state)
-
                 NS_GREEN:
                     if (timer_done)
                         next_state = NS_YELLOW;
@@ -173,27 +172,39 @@ module junction_controller #(
 
                 default:
                     next_state = ALL_RED_2;
-
             endcase
         end
     end
 
     // Sequential logic
     always @(posedge clk) begin
-
         if (!rst_n) begin
-            state          <= ALL_RED_2;
-            ped_pending    <= 1'b0;
-            ped_req_out    <= 1'b0;
-            ns_green_start <= 1'b0;
-            timer_pause    <= 1'b0;
-            red_elapsed    <= 1'b0;
+            state           <= ALL_RED_2;
+            ped_pending     <= 1'b0;
+            ped_request_seen <= 1'b0;
+            ns_green_start  <= 1'b0;
+            timer_pause     <= 1'b0;
+            red_elapsed     <= 1'b0;
         end
         else begin
-
-            state          <= next_state;
+            state <= next_state;
             ns_green_start <= 1'b0;
 
+            // Detect a new request only once while input stays high
+            if (!ped_request)
+                ped_request_seen <= 1'b0;
+            else if (!ped_request_seen)
+                ped_request_seen <= 1'b1;
+
+            // Latch a new pedestrian request
+            if (ped_request && !ped_request_seen)
+                ped_pending <= 1'b1;
+
+            // Clear request only after the pedestrian phase finishes
+            if (state == PED_PHASE && timer_done)
+                ped_pending <= 1'b0;
+
+            // Timer pause control
             if (state == EMERGENCY)
                 timer_pause <= 1'b0;
             else if (timer_done)
@@ -201,35 +212,25 @@ module junction_controller #(
             else if (timer_pause)
                 timer_pause <= 1'b0;
 
+            // Red timer completion
             if (next_state == ALL_RED_2 && state != ALL_RED_2)
                 red_elapsed <= 1'b0;
             else if (state == ALL_RED_2 && timer_done)
                 red_elapsed <= 1'b1;
 
-            if (next_state == PED_PHASE) begin
-                ped_pending <= ped_request;
-                ped_req_out <= ped_request;
-            end
-            else if (ped_request) begin
-                ped_pending <= 1'b1;
-                ped_req_out <= 1'b1;
-            end
-
+            // Green-wave start indication
             if (next_state == NS_GREEN && state != NS_GREEN)
                 ns_green_start <= 1'b1;
-
         end
     end
 
     // Traffic light outputs
     always @(*) begin
-
         ns_light = RED;
         ew_light = RED;
         ped_walk = 1'b0;
 
         case (state)
-
             NS_GREEN: begin
                 ns_light = GREEN;
                 ew_light = RED;
@@ -277,7 +278,6 @@ module junction_controller #(
                 ew_light = RED;
                 ped_walk = 1'b0;
             end
-
         endcase
     end
 
