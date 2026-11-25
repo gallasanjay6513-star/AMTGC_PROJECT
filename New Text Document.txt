@@ -1,0 +1,12 @@
+
+# ModelSim generated files
+*.wlf
+*.mti
+*.mpf
+transcript
+work/
+vsim.dbg
+*.qdb
+*.qpg
+*.qtl
+*.vstf

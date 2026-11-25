@@ -1,0 +1,175 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dD:/
+vamtgc_top
+Z0 !s110 1795505822
+!i10b 1
+!s100 NfmIL`kNXB6_7S7;Q^<cL2
+IHKMGg379T^_DJKBm5T>fj3
+Z1 VDg1SIo80bB@j0V0VzS_@n1
+Z2 dD:/AMTGC_PROJECT
+w1795502907
+8D:/AMTGC_PROJECT/RTL/amtgc_top.v
+FD:/AMTGC_PROJECT/RTL/amtgc_top.v
+L0 2
+Z3 OV;L;10.5b;63
+r1
+!s85 0
+31
+Z4 !s108 1795505822.000000
+!s107 D:/AMTGC_PROJECT/RTL/amtgc_top.v|
+!s90 -reportprogress|300|-work|work|-stats=none|D:/AMTGC_PROJECT/RTL/amtgc_top.v|
+!i113 1
+Z5 o-work work
+Z6 tCvgOpt 0
+vamtgc_top_tb
+R0
+!i10b 1
+!s100 g_9J4I5OPmiQ9l@>0SjS]2
+I3C@KRKDRaQ37L[TcOXk?Z3
+R1
+R2
+w1795504941
+8D:/AMTGC_PROJECT/TB/amtgc_top_tb.v
+FD:/AMTGC_PROJECT/TB/amtgc_top_tb.v
+L0 4
+R3
+r1
+!s85 0
+31
+R4
+!s107 D:/AMTGC_PROJECT/TB/amtgc_top_tb.v|
+!s90 -reportprogress|300|-work|work|-stats=none|D:/AMTGC_PROJECT/TB/amtgc_top_tb.v|
+!i113 1
+R5
+R6
+vgeneric_timer
+R0
+!i10b 1
+!s100 i7[Gc@anRc2_CaSU`Ad@R2
+I:oN?COFAZjS9]S4Qj8EOa0
+R1
+R2
+w1795412304
+8D:/AMTGC_PROJECT/RTL/generic_timer.v
+FD:/AMTGC_PROJECT/RTL/generic_timer.v
+L0 1
+R3
+r1
+!s85 0
+31
+!s108 1795505821.000000
+!s107 D:/AMTGC_PROJECT/RTL/generic_timer.v|
+!s90 -reportprogress|300|-work|work|-stats=none|D:/AMTGC_PROJECT/RTL/generic_timer.v|
+!i113 1
+R5
+R6
+vgeneric_timer_tb
+Z7 !s110 1795455032
+!i10b 1
+!s100 9Z[>j^1_HeIC1lB5O2K3<1
+IoB<UDim8hL=l>S9>EYYQP3
+R1
+R2
+w1795413978
+8TB/generic_timer_tb.v
+FTB/generic_timer_tb.v
+L0 3
+R3
+r1
+!s85 0
+31
+Z8 !s108 1795455032.000000
+!s107 TB/generic_timer_tb.v|
+!s90 -reportprogress|300|TB/generic_timer_tb.v|
+!i113 1
+R6
+vjunction_controller
+R0
+!i10b 1
+!s100 1[lo8I<Sd5VdPAOmgzF;U2
+I2V1:dl2[B6RZ4^X?=NKaC0
+R1
+R2
+w1795502837
+8D:/AMTGC_PROJECT/RTL/junction_controller.v
+FD:/AMTGC_PROJECT/RTL/junction_controller.v
+L0 2
+R3
+r1
+!s85 0
+31
+R4
+!s107 D:/AMTGC_PROJECT/RTL/junction_controller.v|
+!s90 -reportprogress|300|-work|work|-stats=none|D:/AMTGC_PROJECT/RTL/junction_controller.v|
+!i113 1
+R5
+R6
+vjunction_controller_tb
+R7
+!i10b 1
+!s100 [of1mjE>CKmKQ1jRX:XIR1
+IBZ9zj:S7]o_75FbiGX8H`1
+R1
+R2
+w1795424781
+8TB/junction_controller_tb.v
+FTB/junction_controller_tb.v
+L0 4
+R3
+r1
+!s85 0
+31
+R8
+!s107 TB/junction_controller_tb.v|
+!s90 -reportprogress|300|TB/junction_controller_tb.v|
+!i113 1
+R6
+vped_arbiter
+R0
+!i10b 1
+!s100 7W3cN1^gz;biVmBH=a5f32
+IT8MzR>N2LmUHc4J`3QInZ1
+R1
+R2
+w1795452494
+8D:/AMTGC_PROJECT/RTL/ped_arbiter.v
+FD:/AMTGC_PROJECT/RTL/ped_arbiter.v
+L0 2
+R3
+r1
+!s85 0
+31
+R4
+!s107 D:/AMTGC_PROJECT/RTL/ped_arbiter.v|
+!s90 -reportprogress|300|-work|work|-stats=none|D:/AMTGC_PROJECT/RTL/ped_arbiter.v|
+!i113 1
+R5
+R6
+vped_arbiter_tb
+R7
+!i10b 1
+!s100 _>8CN`MzYBPd`z8RiU]=b0
+I9egRIeaXU01SBkNj>>P[[2
+R1
+R2
+w1795452613
+8TB/ped_arbiter_tb.v
+FTB/ped_arbiter_tb.v
+L0 4
+R3
+r1
+!s85 0
+31
+R8
+!s107 TB/ped_arbiter_tb.v|
+!s90 -reportprogress|300|TB/ped_arbiter_tb.v|
+!i113 1
+R6

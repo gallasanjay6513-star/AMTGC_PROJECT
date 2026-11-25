@@ -1,0 +1,15 @@
+D:/AMTGC_PROJECT/RTL/generic_timer.v {1 {vlog -work work -stats=none D:/AMTGC_PROJECT/RTL/generic_timer.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module generic_timer
+
+Top level modules:
+	generic_timer
+
+} {} {}} D:/AMTGC_PROJECT/TB/generic_timer_tb.v {1 {vlog -work work -stats=none D:/AMTGC_PROJECT/TB/generic_timer_tb.v
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module generic_timer_tb
+
+Top level modules:
+	generic_timer_tb
+
+} {} {}}

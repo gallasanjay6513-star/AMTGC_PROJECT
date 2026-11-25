@@ -1,0 +1,52 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dD:/
+vgeneric_timer
+Z0 !s110 1795414736
+!i10b 1
+!s100 i7[Gc@anRc2_CaSU`Ad@R2
+I:oN?COFAZjS9]S4Qj8EOa0
+Z1 VDg1SIo80bB@j0V0VzS_@n1
+Z2 dD:/AMTGC_TIMER
+w1795412304
+8D:/AMTGC_PROJECT/RTL/generic_timer.v
+FD:/AMTGC_PROJECT/RTL/generic_timer.v
+L0 1
+Z3 OV;L;10.5b;63
+r1
+!s85 0
+31
+!s108 1795414735.000000
+!s107 D:/AMTGC_PROJECT/RTL/generic_timer.v|
+!s90 -reportprogress|300|-work|work|-stats=none|D:/AMTGC_PROJECT/RTL/generic_timer.v|
+!i113 1
+Z4 o-work work
+Z5 tCvgOpt 0
+vgeneric_timer_tb
+R0
+!i10b 1
+!s100 9Z[>j^1_HeIC1lB5O2K3<1
+IO9^:Wnz;?ZTEH07C?CYe@3
+R1
+R2
+w1795413978
+8D:/AMTGC_PROJECT/TB/generic_timer_tb.v
+FD:/AMTGC_PROJECT/TB/generic_timer_tb.v
+L0 3
+R3
+r1
+!s85 0
+31
+!s108 1795414736.000000
+!s107 D:/AMTGC_PROJECT/TB/generic_timer_tb.v|
+!s90 -reportprogress|300|-work|work|-stats=none|D:/AMTGC_PROJECT/TB/generic_timer_tb.v|
+!i113 1
+R4
+R5

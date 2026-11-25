@@ -1,0 +1,188 @@
+==================================================
+ADAPTIVE MULTI-JUNCTION TRAFFIC GRID CONTROLLER
+(AMTGC)
+==================================================
+
+1. PROJECT OVERVIEW
+-------------------
+
+The Adaptive Multi-Junction Traffic Grid Controller
+(AMTGC) is a digital traffic control system designed
+to manage two four-way traffic junctions.
+
+The system contains:
+1. Junction A Controller
+2. Junction B Controller
+3. Generic Timer
+4. Shared Pedestrian Arbiter
+5. Green-Wave Coordination
+6. Emergency Override
+
+The main objective is to improve traffic flow,
+provide fair pedestrian access, and ensure safe
+traffic signal operation.
+
+2. SYSTEM MODULES
+-----------------
+
+1. AMJTC_TOP
+   Purpose: Main top-level system integration.
+
+2. junction_controller
+   Purpose: Controls traffic signals using
+   a Moore Finite State Machine (FSM).
+
+3. generic_timer
+   Purpose: Provides configurable timing
+   for different traffic phases.
+
+4. ped_arbiter
+   Purpose: Receives pedestrian requests from
+   both junctions and grants them fairly.
+
+5. Green-Wave Coordination Logic
+   Purpose: Coordinates Junction A and Junction B
+   North-South green signals.
+
+6. Emergency Override Logic
+   Purpose: Forces both junctions to transition
+   safely to an All-Red state.
+
+==================================================
+3. TOP-LEVEL BLOCK DIAGRAM
+==================================================
+
+                    AMJTC_TOP
+                        |
+          +-------------+-------------+
+          |                           |
+          v                           v
+   JUNCTION A                    JUNCTION B
+   CONTROLLER                    CONTROLLER
+          |                           |
+    GENERIC TIMER               GENERIC TIMER
+          |                           |
+          +-------------+-------------+
+                        |
+          +-------------+-------------+
+          |             |             |
+          v             v             v
+     GREEN-WAVE     PED_ARBITER    EMERGENCY
+    COORDINATION                  OVERRIDE
+
+---------------------
+4. MODULE CONNECTIONS
+---------------------
+
+1. AMJTC_TOP:
+   Connects all system modules.
+
+2. Junction A Controller:
+   Receives clock, reset, emergency control,
+   pedestrian grant and traffic density.
+
+3. Junction B Controller:
+   Receives clock, reset, emergency control,
+   pedestrian grant and traffic density.
+
+4. Generic Timer:
+   Each junction controller uses its own
+   generic timer instance.
+
+5. Pedestrian Arbiter:
+   Receives pedestrian requests from both
+   junctions and generates grant signals.
+
+6. Green-Wave Coordination:
+   Detects Junction A North-South Green
+   and coordinates Junction B North-South Green
+   using a configured delay.
+
+7. Emergency Override:
+   Broadcasts the emergency control signal
+   to both junction controllers.
+
+------------------------
+5. SYSTEM CLOCK AND RESET
+------------------------
+
+Clock Strategy:
+A single clock domain is used throughout
+the complete system.
+
+Reset Strategy:
+Synchronous Active-Low Reset.
+
+rst_n = 0 : Reset Active
+rst_n = 1 : Normal Operation
+
+All sequential modules use the same clock
+and reset strategy.
+==================================================
+6. VERIFICATION TEST PLAN
+==================================================
+
+The following 15 test scenarios will be used
+to verify the AMTGC system during simulation.
+
+TEST 1: Initial Reset
+Expected: Both junction controllers enter
+their defined reset state.
+
+TEST 2: North-South Green
+Expected: North-South Green turns ON and
+East-West Red remains ON.
+
+TEST 3: North-South Yellow
+Expected: North-South Yellow activates
+before the next traffic phase.
+
+TEST 4: All-Red Phase
+Expected: All traffic directions show Red.
+
+TEST 5: East-West Green
+Expected: East-West Green turns ON and
+North-South Red remains ON.
+
+TEST 6: East-West Yellow
+Expected: East-West Yellow activates
+before the next traffic phase.
+
+TEST 7: Complete Traffic Cycle
+Expected: The controller follows the sequence:
+NS Green -> NS Yellow -> All-Red ->
+EW Green -> EW Yellow -> All-Red.
+
+TEST 8: Green-Wave Coordination
+Expected: Junction B North-South Green
+starts after the configured delay following
+Junction A North-South Green.
+
+TEST 9: Pedestrian Request at Junction A
+Expected: Junction A pedestrian request
+is received and serviced safely.
+
+TEST 10: Pedestrian Request at Junction B
+Expected: Junction B pedestrian request
+is received and serviced safely.
+
+TEST 11: Simultaneous Pedestrian Requests
+Expected: Both requests are handled using
+fair arbitration.
+
+TEST 12: Repeated Pedestrian Requests
+Expected: Neither junction experiences
+starvation.
+
+TEST 13: Emergency During Normal Traffic
+Expected: Both junctions safely transition
+to All-Red within the specified clock cycles.
+
+TEST 14: Emergency During Pedestrian Phase
+Expected: Both junctions safely transition
+to All-Red within the specified clock cycles.
+
+TEST 15: Emergency Deactivation
+Expected: Both junctions resume safe
+normal operation from a valid traffic phase.
+
