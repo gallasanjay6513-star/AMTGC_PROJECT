@@ -1,133 +1,151 @@
 
-`timescale 1ns/1ps
+module amtgc_top #(
+    parameter COUNTER_WIDTH    = 8,
+    parameter GREEN_TIME       = 10,
+    parameter YELLOW_TIME      = 3,
+    parameter RED_TIME         = 2,
+    parameter PED_TIME         = 5,
+    parameter GREEN_WAVE_DELAY = 3
+)
+(
+    input wire clk,
+    input wire rst_n,
+    input wire emergency_override,
 
-module amtgc_top_tb;
+    input wire ped_request_a,
+    input wire ped_request_b,
 
-    reg clk;
-    reg rst_n;
-    reg emergency_override;
+    input wire [1:0] traffic_density_a,
+    input wire [1:0] traffic_density_b,
 
-    reg ped_request_a;
-    reg ped_request_b;
+    output wire [1:0] a_ns_light,
+    output wire [1:0] a_ew_light,
+    output wire [1:0] b_ns_light,
+    output wire [1:0] b_ew_light,
 
-    reg [1:0] traffic_density_a;
-    reg [1:0] traffic_density_b;
+    output wire a_ped_walk,
+    output wire b_ped_walk
+);
 
-    wire [1:0] a_ns_light;
-    wire [1:0] a_ew_light;
-    wire [1:0] b_ns_light;
-    wire [1:0] b_ew_light;
+    // Pedestrian request and grant signals
+    wire ped_req_a;
+    wire ped_req_b;
 
-    wire a_ped_walk;
-    wire b_ped_walk;
+    wire ped_grant_a;
+    wire ped_grant_b;
 
-    // DUT: Design Under Test
+    // Green-wave signals
+    wire a_ns_green_start;
 
-    amtgc_top #(
-        .COUNTER_WIDTH(8),
-        .GREEN_TIME(10),
-        .YELLOW_TIME(3),
-        .RED_TIME(2),
-        .PED_TIME(5),
-        .GREEN_WAVE_DELAY(3)
-    ) dut (
+    reg [COUNTER_WIDTH-1:0] green_wave_count;
+    reg green_wave_active;
+
+    wire b_ns_start_enable;
+
+    // Junction A
+    junction_controller #(
+        .COUNTER_WIDTH(COUNTER_WIDTH),
+        .GREEN_TIME(GREEN_TIME),
+        .YELLOW_TIME(YELLOW_TIME),
+        .RED_TIME(RED_TIME),
+        .PED_TIME(PED_TIME)
+    ) junction_a (
         .clk(clk),
         .rst_n(rst_n),
         .emergency_override(emergency_override),
 
-        .ped_request_a(ped_request_a),
-        .ped_request_b(ped_request_b),
+        .ped_request(ped_request_a),
+        .ped_grant(ped_grant_a),
+        .ns_start_enable(1'b1),
+        .traffic_density(traffic_density_a),
 
-        .traffic_density_a(traffic_density_a),
-        .traffic_density_b(traffic_density_b),
+        .ped_req_out(ped_req_a),
+        .ped_walk(a_ped_walk),
+        .ns_green_start(a_ns_green_start),
 
-        .a_ns_light(a_ns_light),
-        .a_ew_light(a_ew_light),
-        .b_ns_light(b_ns_light),
-        .b_ew_light(b_ew_light),
-
-        .a_ped_walk(a_ped_walk),
-        .b_ped_walk(b_ped_walk)
+        .ns_light(a_ns_light),
+        .ew_light(a_ew_light)
     );
 
-    // Clock generation: 10 ns period
+    // Junction B
+    junction_controller #(
+        .COUNTER_WIDTH(COUNTER_WIDTH),
+        .GREEN_TIME(GREEN_TIME),
+        .YELLOW_TIME(YELLOW_TIME),
+        .RED_TIME(RED_TIME),
+        .PED_TIME(PED_TIME)
+    ) junction_b (
+        .clk(clk),
+        .rst_n(rst_n),
+        .emergency_override(emergency_override),
 
-    always #5 clk = ~clk;
+        .ped_request(ped_request_b),
+        .ped_grant(ped_grant_b),
+        .ns_start_enable(b_ns_start_enable),
+        .traffic_density(traffic_density_b),
 
-    // Test sequence
+        .ped_req_out(ped_req_b),
+        .ped_walk(b_ped_walk),
+        .ns_green_start(),
 
-    initial begin
+        .ns_light(b_ns_light),
+        .ew_light(b_ew_light)
+    );
 
-        clk = 0;
-        rst_n = 0;
-        emergency_override = 0;
+    // Shared pedestrian arbiter
+    ped_arbiter pedestrian_arbiter (
+        .clk(clk),
+        .rst_n(rst_n),
 
-        ped_request_a = 0;
-        ped_request_b = 0;
+        .req_a(ped_req_a),
+        .req_b(ped_req_b),
 
-        traffic_density_a = 2'b01;
-        traffic_density_b = 2'b10;
+        .grant_a(ped_grant_a),
+        .grant_b(ped_grant_b)
+    );
 
-        $display("AMTGC Integration Simulation Started");
+    // B is enabled only after the configured delay.
+    // It must still satisfy its own ALL-RED clearance.
+    assign b_ns_start_enable =
+        green_wave_active &&
+        (green_wave_count >= GREEN_WAVE_DELAY - 1);
 
-        // Reset
+    // Green-wave counter and control
+    always @(posedge clk) begin
 
-        #20;
-        rst_n = 1;
+        if (!rst_n) begin
+            green_wave_count  <= 0;
+            green_wave_active <= 1'b0;
+        end
 
-        // Normal traffic operation
+        else if (emergency_override) begin
+            green_wave_count  <= 0;
+            green_wave_active <= 1'b0;
+        end
 
-        #150;
+        else begin
 
-        // Simultaneous pedestrian requests
+            // Start timing when A enters NS GREEN
+            if (a_ns_green_start && !green_wave_active) begin
+                green_wave_count  <= 0;
+                green_wave_active <= 1'b1;
+            end
 
-        ped_request_a = 1;
-        ped_request_b = 1;
+            // Count the configured delay
+            else if (green_wave_active &&
+                     green_wave_count < GREEN_WAVE_DELAY - 1) begin
 
-        #100;
+                green_wave_count <= green_wave_count + 1'b1;
+            end
 
-        ped_request_a = 0;
-        ped_request_b = 0;
+            // Stop after B actually enters NS GREEN
+            else if (green_wave_active &&
+                     b_ns_light == 2'b10) begin
 
-        // Allow pedestrian service
-
-        #200;
-
-        // Emergency test
-
-        emergency_override = 1;
-
-        #50;
-
-        emergency_override = 0;
-
-        // Resume normal operation
-
-        #200;
-
-        $display("AMTGC Integration Simulation Completed");
-
-        $finish;
-
-    end
-
-    // Monitor outputs
-
-    initial begin
-
-        $monitor(
-            "Time=%0t | Reset=%b | Emergency=%b | A_NS=%b | A_EW=%b | B_NS=%b | B_EW=%b | A_PED=%b | B_PED=%b",
-            $time,
-            rst_n,
-            emergency_override,
-            a_ns_light,
-            a_ew_light,
-            b_ns_light,
-            b_ew_light,
-            a_ped_walk,
-            b_ped_walk
-        );
-
+                green_wave_count  <= 0;
+                green_wave_active <= 1'b0;
+            end
+        end
     end
 
 endmodule
