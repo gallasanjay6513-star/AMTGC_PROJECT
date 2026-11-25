@@ -119,6 +119,41 @@ module amtgc_top_tb;
         end
     endtask
 
+    // TEST 1: Initial Reset
+    task initial_reset_test;
+        begin
+            $display("------------------------------------");
+            $display("TEST 1: INITIAL RESET");
+
+            rst_n = 0;
+            emergency_override = 0;
+            ped_request_a = 0;
+            ped_request_b = 0;
+            traffic_density_a = 2'b00;
+            traffic_density_b = 2'b00;
+
+            repeat (2) @(posedge clk);
+            #1;
+
+            if (a_ns_light == RED &&
+                a_ew_light == RED &&
+                b_ns_light == RED &&
+                b_ew_light == RED &&
+                a_ped_walk == 0 &&
+                b_ped_walk == 0) begin
+
+                $display("PASS: Both junctions are ALL RED during reset");
+            end
+            else begin
+                $display("FAIL: Initial reset output mismatch");
+                errors = errors + 1;
+            end
+
+            rst_n = 1;
+            @(negedge clk);
+        end
+    endtask
+
     // Adaptive green-duration measurement
     task measure_green_duration;
         input [1:0] density;
@@ -132,7 +167,6 @@ module amtgc_top_tb;
             traffic_density_a = density;
             traffic_density_b = density;
 
-            // Wait for A NS GREEN
             wait (a_ns_light == GREEN);
 
             measured_cycles = 0;
@@ -174,11 +208,9 @@ module amtgc_top_tb;
 
             timeout_count = 0;
 
-            // Wait for A NS GREEN
             wait (a_ns_light == GREEN);
             a_green_time = $time;
 
-            // Wait for B NS GREEN, with timeout
             while (b_ns_light != GREEN && timeout_count < 100) begin
                 @(posedge clk);
                 #1;
@@ -210,7 +242,7 @@ module amtgc_top_tb;
         end
     endtask
 
-    // TEST 5: Repeated pedestrian requests - No starvation
+    // TEST: Repeated pedestrian requests
     task repeated_pedestrian_test;
 
         integer round;
@@ -222,24 +254,21 @@ module amtgc_top_tb;
             reset_system();
 
             $display("------------------------------------");
-            $display("TEST 5: Repeated Pedestrian Requests");
+            $display("REPEATED PEDESTRIAN REQUEST TEST");
 
             for (round = 1; round <= 3; round = round + 1) begin
 
                 a_before = a_walk_count;
                 b_before = b_walk_count;
 
-                // Send simultaneous requests
                 @(negedge clk);
                 ped_request_a = 1'b1;
                 ped_request_b = 1'b1;
 
-                // Release request inputs
                 @(negedge clk);
                 ped_request_a = 1'b0;
                 ped_request_b = 1'b0;
 
-                // Wait for both junctions to receive WALK
                 timeout_count = 0;
 
                 while ((a_walk_count == a_before ||
@@ -263,7 +292,6 @@ module amtgc_top_tb;
                     errors = errors + 1;
                 end
 
-                // Wait for both pedestrian requests to be cleared
                 timeout_count = 0;
 
                 while ((dut.junction_a.ped_req_out ||
@@ -275,8 +303,7 @@ module amtgc_top_tb;
                 end
 
                 if (timeout_count >= 300) begin
-                    $display("FAIL: Round %0d - Pedestrian phase did not complete",
-                             round);
+                    $display("FAIL: Pedestrian phase did not complete");
                     errors = errors + 1;
                 end
 
@@ -284,7 +311,6 @@ module amtgc_top_tb;
             end
 
             $display("Repeated pedestrian request test completed.");
-
         end
     endtask
 
@@ -307,21 +333,23 @@ module amtgc_top_tb;
         $display("AMTGC VERIFICATION STARTED");
         $display("------------------------------------");
 
-        // TEST 0: Adaptive green duration
-        $display("TEST 0: Adaptive Green Duration");
+        // TEST 1: Initial Reset
+        initial_reset_test();
+
+        // TEST 2: Adaptive green duration
+        $display("TEST 2: ADAPTIVE GREEN DURATION");
 
         measure_green_duration(2'b00, 5);
         measure_green_duration(2'b01, 10);
         measure_green_duration(2'b10, 15);
         measure_green_duration(2'b11, 20);
 
-        // TEST 1: Green-wave timing
-        $display("TEST 1: Green-Wave Timing");
-
+        // TEST 3: Green-wave timing
+        $display("TEST 3: GREEN-WAVE TIMING");
         measure_green_wave();
 
-        // TEST 2: Traffic density inputs
-        $display("TEST 2: Traffic Density Inputs");
+        // TEST 4: Traffic density inputs
+        $display("TEST 4: TRAFFIC DENSITY INPUTS");
 
         reset_system();
 
@@ -339,8 +367,8 @@ module amtgc_top_tb;
 
         $display("Traffic density input stimulus completed.");
 
-        // TEST 3: Simultaneous pedestrian requests
-        $display("TEST 3: Simultaneous Pedestrian Requests");
+        // TEST 5: Simultaneous pedestrian requests
+        $display("TEST 5: SIMULTANEOUS PEDESTRIAN REQUESTS");
 
         reset_system();
 
@@ -364,17 +392,15 @@ module amtgc_top_tb;
             errors = errors + 1;
         end
 
-        // TEST 4: Emergency override
-        $display("TEST 4: Emergency Override");
+        // TEST 6: Emergency override during traffic
+        $display("TEST 6: EMERGENCY OVERRIDE");
 
         reset_system();
 
-        // Wait until at least one junction has a GREEN light
         wait (a_ns_light == GREEN || b_ns_light == GREEN);
 
         emergency_override = 1'b1;
 
-        // Wait for sequential logic to update
         @(posedge clk);
         #1;
 
@@ -392,7 +418,6 @@ module amtgc_top_tb;
             errors = errors + 1;
         end
 
-        // Verify ALL RED remains active
         repeat (3) begin
             @(posedge clk);
             #1;
@@ -419,7 +444,8 @@ module amtgc_top_tb;
 
         repeat (2) @(posedge clk);
 
-        // TEST 5: Repeated pedestrian requests
+        // TEST 7: Repeated pedestrian requests
+        $display("TEST 7: REPEATED PEDESTRIAN REQUESTS");
         repeated_pedestrian_test();
 
         // Final summary
@@ -438,8 +464,7 @@ module amtgc_top_tb;
         $display("AMTGC SIMULATION COMPLETED");
 
         #10;
-delete wave *
-add wave -r sim:/amtgc_top_tb/*        $finish;
+        $finish;
     end
 
 endmodule
