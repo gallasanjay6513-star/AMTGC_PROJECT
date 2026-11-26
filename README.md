@@ -130,7 +130,6 @@ The integrated testbench checks a number of these behaviours automatically. Some
 Detailed project information, architecture, module descriptions, simulation procedure and verification evidence should be maintained in the `DOCS` folder.
 
 - **Complete Project Documentation:** `DOCS/AMTGC_Updated_Complete_Project_Documentation.docx`
-- **Simulation and Verification Report:** `DOCS/AMTGC_Simulation_Verification_Report.docx`
 - **Test Scenario Verification Report:** `DOCS/AMTGC_Test_Scenario_Verification_Report.docx`
 
 If a document has a different filename or format in your repository, update the filename above accordingly.
